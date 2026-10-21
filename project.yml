@@ -1,0 +1,317 @@
+name: Nimlet
+options:
+  bundleIdPrefix: com.renyicao.mice
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "26.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    SWIFT_STRICT_CONCURRENCY: minimal
+    MARKETING_VERSION: "0.1.1"
+    CURRENT_PROJECT_VERSION: "49"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+# The team and bundle identifier prefix. Official values live in
+# Signing/Base.xcconfig; a fork overrides them in Signing/Local.xcconfig, which
+# Git ignores. Targets must not set DEVELOPMENT_TEAM themselves, or they would
+# win over the override.
+configFiles:
+  Debug: Signing/Base.xcconfig
+  Release: Signing/Base.xcconfig
+
+packages:
+  # KCP for the direct UDP path (`DirectLink`). Only the two apps and the tests
+  # link it; the CLI and the notification extension never open that path.
+  CKCP:
+    path: Packages/CKCP
+
+targets:
+  NimletHost:
+    type: application
+    platform: macOS
+    sources:
+      - path: NimletHost
+      - path: LICENSE
+        buildPhase: resources
+      - path: THIRD-PARTY-NOTICES.txt
+        buildPhase: resources
+      - path: Shared
+      - path: DirectLink
+    info:
+      path: NimletHost/Info.plist
+      properties:
+        CFBundleName: Nimlet
+        CFBundleDisplayName: Nimlet
+        # Read from the build setting. Hardcoding these meant the bundle
+        # claimed 1.0 while MARKETING_VERSION said 0.1.0, and an updater
+        # comparing the two would never see a new release.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSUIElement: true
+        LSMinimumSystemVersion: "14.0"
+        NSLocalNetworkUsageDescription: "Nimlet listens on your local network so your iPhone can act as a trackpad and send dictated text to this Mac."
+        NSBonjourServices:
+          - _mice._tcp
+          # The trust listener. Without it macOS refuses to advertise the service
+          # (kDNSServiceErr_NoAuth) and the listener fails with it.
+          - _nimlet._tcp
+        # A home router's UPnP description document and its SOAP control URL are
+        # plain HTTP on a private address — there is no other kind, and there
+        # never will be, because a router cannot hold a certificate for
+        # 192.168.1.1. This is the narrowest exception Apple provides: it permits
+        # insecure loads to private and link-local addresses and to unqualified
+        # names, and to nothing else. Nimlet makes no other HTTP request of any
+        # kind, to anywhere.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        # Where sealed push notifications go when nothing is set in the app's
+        # own Notifications settings. Empty means the path is off. Set the two
+        # build settings below once, after deploying Relay/ — a tester gets a
+        # Mac app that already knows the relay, not a `defaults write`.
+        MicePushRelayURL: $(MICE_PUSH_RELAY_URL)
+        MicePushRelaySecret: $(MICE_PUSH_RELAY_SECRET)
+        MiceConnectRelay: $(MICE_CONNECT_RELAY)
+        MiceConnectRelayFingerprint: $(MICE_CONNECT_RELAY_FINGERPRINT)
+    dependencies:
+      - package: CKCP
+      # The headless client, copied into Contents/Helpers so a tester has it
+      # without a compiler. The approval and agent-event features exist only
+      # through it, and a zip that shipped without it shipped without them.
+      # Helpers rather than MacOS, so a case-insensitive disk never has to
+      # hold the app's executable and `nimlet` side by side.
+      - target: nimlet
+        embed: true
+        link: false
+        codeSign: true
+        copy:
+          destination: wrapper
+          subpath: Contents/Helpers
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NIMLET_BUNDLE_ID_PREFIX).host
+        MICE_PUSH_RELAY_URL: ""
+        MICE_PUSH_RELAY_SECRET: ""
+        MICE_CONNECT_RELAY: ""
+        MICE_CONNECT_RELAY_FINGERPRINT: ""
+        # Keep the existing executable/install path during the display-name rebrand.
+        # Public Nimlet.app packaging and upgrade behavior need separate validation.
+        PRODUCT_NAME: Mice
+        CODE_SIGN_STYLE: Manual
+        # Developer ID unless Signing/Local.xcconfig says otherwise.
+        CODE_SIGN_IDENTITY: $(NIMLET_MAC_SIGN_IDENTITY)
+        CODE_SIGN_ENTITLEMENTS: Signing/NimletHost.entitlements
+        # Notarization refuses a Developer ID build without this, so the two
+        # settings were contradicting each other: the app could be signed for
+        # distribution and then never distributed.
+        ENABLE_HARDENED_RUNTIME: YES
+        COMBINE_HIDPI_IMAGES: YES
+
+  # The `nimlet` command-line tool. `make tool` still builds it with swiftc for
+  # a quick loop; this target is what puts a signed copy inside Nimlet.app.
+  nimlet:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Shared
+      - path: Tools/nimlet
+    settings:
+      base:
+        PRODUCT_NAME: nimlet
+        PRODUCT_BUNDLE_IDENTIFIER: $(NIMLET_BUNDLE_ID_PREFIX).cli
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: $(NIMLET_MAC_SIGN_IDENTITY)
+        # Nested code inside a notarized app has to meet the same bar as the
+        # app, or notarization rejects the bundle for the helper's sake.
+        ENABLE_HARDENED_RUNTIME: YES
+        SKIP_INSTALL: YES
+
+  NimletRemote:
+    type: application
+    platform: iOS
+    sources:
+      - path: NimletRemote
+      - path: LICENSE
+        buildPhase: resources
+      - path: THIRD-PARTY-NOTICES.txt
+        buildPhase: resources
+      - path: Shared
+      - path: DirectLink
+      - path: Signing/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    info:
+      path: NimletRemote/Info.plist
+      properties:
+        NimletPublicBeta: true
+        # Read by SecretStore.sharedGroup; must match the entitlement.
+        NimletKeychainGroup: $(DEVELOPMENT_TEAM).$(NIMLET_BUNDLE_ID_PREFIX).shared
+        CFBundleName: Nimlet
+        CFBundleDisplayName: Nimlet
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        # The one thing in this app that has any business running off screen.
+        # Everything else is a foreground input device — a phone beside the
+        # keyboard — and the socket is given up when the app leaves. Listening to
+        # the Mac is the opposite premise: you have walked away, and the audio has
+        # to survive the screen locking and the phone going into a pocket. iOS
+        # grants that to an app that is genuinely playing audio, which is also why
+        # `ListenClient` registers as what's-playing: the pause button on the lock
+        # screen is how you stop it without unlocking anything.
+        UIBackgroundModes:
+          - audio
+        # The connection is TLS and nothing else here is encryption, so the app
+        # qualifies for the exemption. Without the key every single upload stops
+        # to ask the same question again.
+        ITSAppUsesNonExemptEncryption: false
+        NSLocalNetworkUsageDescription: "Nimlet finds your Mac on the local network to send pointer moves, clicks and dictated text."
+        NSBonjourServices:
+          # The Mac's trust listener, which is how a phone finds a Mac it
+          # paired with by key.
+          - _nimlet._tcp
+        # `nimlet://pair?...` is what the Mac's QR code says, so the system
+        # Camera can open the app with it, as well as the scanner in the app's
+        # own pairing sheet.
+        CFBundleURLTypes:
+          - CFBundleURLName: $(NIMLET_BUNDLE_ID_PREFIX).pair
+            CFBundleURLSchemes:
+              - nimlet
+        NSMicrophoneUsageDescription: "Dictate text to your Mac by holding a pane's tile or tapping the microphone. Speech is processed on this iPhone when available; fallback recognition may send audio to Apple."
+        NSMotionUsageDescription: "Hold the Air pill to steer the Mac pointer by moving your phone."
+        NSSpeechRecognitionUsageDescription: "Turn speech into text for your selected Mac target. If on-device recognition is unavailable, Apple may process your audio. Only the text is sent to your Mac."
+        # Only the camera, for pairing codes and photos. Picking an existing
+        # photo goes through PhotosPicker, which hands over the one picture you
+        # chose without the app ever being granted the library — so there is
+        # no library usage description here, because the app genuinely never
+        # asks for one.
+        NSCameraUsageDescription: "Scan your Mac's pairing code, or take a photo of something on your desk and send it to an agent running on your Mac."
+    dependencies:
+      - package: CKCP
+      # Embedded, so it ships inside the app. Without it a sealed push arrives
+      # as "Nimlet — Something needs you" and stays that way: nothing else in the
+      # system can open one.
+      - target: NimletNotify
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NIMLET_BUNDLE_ID_PREFIX).remote
+        # The executable and module keep the name builds already on phones
+        # have, like the Mac app's `Mice` above; the target was renamed, the
+        # product was not.
+        PRODUCT_NAME: MiceRemote
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Signing/NimletRemote.entitlements
+        # iPhone only. The pointer surface is sized for a phone held in one
+        # hand, and the app has to stay in the foreground to keep its socket,
+        # which is not how anybody uses an iPad.
+        TARGETED_DEVICE_FAMILY: "1"
+      configs:
+        # An APNs token belongs to one environment and is rejected outright by
+        # the other, so this cannot be a single value. The app reads which it
+        # was built with and tells the Mac, which is the only way the Mac can
+        # know which endpoint to address.
+        Debug:
+          APS_ENVIRONMENT: development
+        Release:
+          APS_ENVIRONMENT: production
+
+  # Opens a sealed push a moment before it is shown.
+  #
+  # A separate process, with its own bundle id and its own entitlements, run by
+  # the system for every alert push whose payload says `mutable-content`. It is
+  # the only place the decryption can happen: the app itself may not have run
+  # for days, which is the entire reason the push existed.
+  NimletNotify:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: NimletNotify
+      # The whole of Shared rather than the four files it needs. Listing them
+      # by hand is a list that goes stale the first time `PushEnvelope` grows a
+      # dependency, and the failure mode is a link error in a target nobody
+      # builds by hand.
+      - path: Shared
+    info:
+      path: NimletNotify/Info.plist
+      properties:
+        CFBundleDisplayName: Nimlet Notifications
+        NimletKeychainGroup: $(DEVELOPMENT_TEAM).$(NIMLET_BUNDLE_ID_PREFIX).shared
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.usernotifications.service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).NotificationService
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NIMLET_BUNDLE_ID_PREFIX).remote.notify
+        PRODUCT_NAME: MiceNotify
+        CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Signing/NimletNotify.entitlements
+        TARGETED_DEVICE_FAMILY: "1"
+
+  NimletTests:
+    type: bundle.unit-test
+    platform: macOS
+    dependencies:
+      - package: CKCP
+    # Shared is compiled into each app rather than linked as a framework, so
+    # the tests have to compile it too; there is no module to import.
+    sources:
+      - path: Tests/NimletTests
+      - path: NimletHost/DeviceRegistry.swift
+      - path: NimletHost/AppRegistry.swift
+      - path: NimletHost/Subprocess.swift
+      - path: NimletHost/VideoEncoder.swift
+      - path: NimletHost/RecoveringListener.swift
+      - path: Shared
+      - path: DirectLink
+      # The host's wire codecs. They are the byte layouts of two router
+      # protocols and one internet one — exactly the kind of code that is easy
+      # to get subtly wrong and impossible to debug from a router's silence — so
+      # they are kept free of AppKit and compiled in here to be tested. The rest
+      # of NimletHost is not, and should not be: it opens sockets and posts events.
+      - path: NimletHost/Wire
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(NIMLET_BUNDLE_ID_PREFIX).tests
+        GENERATE_INFOPLIST_FILE: YES
+        # Ad-hoc signed on purpose: these are logic tests with no host app, and
+        # requiring a team would mean they could only run on a machine that has
+        # one of the project's certificates.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+
+# Declared explicitly: auto-created schemes live in xcuserdata and disappear
+# whenever the project is regenerated.
+schemes:
+  NimletHost:
+    build:
+      targets:
+        NimletHost: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+  NimletRemote:
+    build:
+      targets:
+        NimletRemote: all
+        NimletNotify: all
+    run:
+      config: Debug
+      # Local prices and the two-week trial, so the paywall works from Xcode
+      # before App Store Connect has the products. Archives ignore it.
+      storeKitConfiguration: Tests/StoreKit/Nimlet.storekit
+    archive:
+      config: Release
+  NimletTests:
+    build:
+      targets:
+        NimletTests: [test]
+    test:
+      config: Debug
+      targets:
+        - NimletTests

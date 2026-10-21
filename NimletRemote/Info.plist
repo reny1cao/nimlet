@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Nimlet</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Nimlet</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>$(NIMLET_BUNDLE_ID_PREFIX).pair</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nimlet</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_nimlet._tcp</string>
+	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>Scan your Mac's pairing code, or take a photo of something on your desk and send it to an agent running on your Mac.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Nimlet finds your Mac on the local network to send pointer moves, clicks and dictated text.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Dictate text to your Mac by holding a pane's tile or tapping the microphone. Speech is processed on this iPhone when available; fallback recognition may send audio to Apple.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Hold the Air pill to steer the Mac pointer by moving your phone.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Turn speech into text for your selected Mac target. If on-device recognition is unavailable, Apple may process your audio. Only the text is sent to your Mac.</string>
+	<key>NimletKeychainGroup</key>
+	<string>$(DEVELOPMENT_TEAM).$(NIMLET_BUNDLE_ID_PREFIX).shared</string>
+	<key>NimletPublicBeta</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>UILaunchScreen</key>
+	<dict/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
+</plist>

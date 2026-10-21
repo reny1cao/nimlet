@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build both apps and run the tests
+    # Pinned rather than macos-latest: NimletRemote deploys to iOS 26, so the
+    # image has to carry at least that SDK, and "latest" moving underneath the
+    # project would look like a code failure rather than an image change.
+    runs-on: macos-26
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Printed before anything is built, because "which Xcode was that?" is
+      # the first question asked about any failure that does not reproduce.
+      - name: Record the toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          xcrun --sdk macosx --show-sdk-version
+          xcrun --sdk iphoneos --show-sdk-version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the Xcode project
+        run: xcodegen generate
+
+      # First, so that a protocol regression is reported as a failed test rather
+      # than as whichever app happens to be built next.
+      - name: Run the tests
+        run: |
+          xcodebuild test \
+            -project Nimlet.xcodeproj \
+            -scheme NimletTests \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/dd
+
+      # A runner has none of this project's signing certificates, so these prove
+      # the sources compile and link. They do not prove the app would ship.
+      - name: Build NimletHost
+        run: |
+          xcodebuild build \
+            -project Nimlet.xcodeproj \
+            -scheme NimletHost \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      - name: Build NimletRemote
+        run: |
+          xcodebuild build \
+            -project Nimlet.xcodeproj \
+            -scheme NimletRemote \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/dd \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""
+
+      # The CLI is the third thing in the repo that compiles Shared, and the
+      # only one no Xcode target covers, so it rots quietly without this.
+      - name: Build the nimlet CLI
+        run: |
+          mkdir -p build
+          swiftc -O Shared/*.swift Tools/nimlet/*.swift -o build/nimlet

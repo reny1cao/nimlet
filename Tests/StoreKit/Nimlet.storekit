@@ -1,0 +1,94 @@
+{
+  "identifier": "B32B4957-6A98-4265-81BC-5EEB0512766A",
+  "nonRenewingSubscriptions": [],
+  "products": [
+    {
+      "displayPrice": "99.99",
+      "familyShareable": false,
+      "internalID": "775924773",
+      "localizations": [
+        {
+          "description": "Multi-target messages, image attachments and screenshot annotation.",
+          "displayName": "Nimlet Pro Lifetime",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.renyicao.nimlet.pro.lifetime",
+      "referenceName": "Nimlet Pro Lifetime",
+      "type": "NonConsumable"
+    }
+  ],
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "subscriptionGroups": [
+    {
+      "id": "21800001",
+      "localizations": [],
+      "name": "Nimlet Pro",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "29.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6817000002",
+          "introductoryOffer": {
+            "internalID": "6817000012",
+            "numberOfPeriods": 1,
+            "paymentMode": "free",
+            "subscriptionPeriod": "P2W"
+          },
+          "localizations": [
+            {
+              "description": "Multi-target messages, image attachments and screenshot annotation.",
+              "displayName": "Nimlet Pro Annual",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.renyicao.nimlet.pro.annual",
+          "recurringSubscriptionPeriod": "P1Y",
+          "referenceName": "Nimlet Pro Annual",
+          "subscriptionGroupID": "21800001",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        },
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "4.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6817000001",
+          "introductoryOffer": {
+            "internalID": "6817000011",
+            "numberOfPeriods": 1,
+            "paymentMode": "free",
+            "subscriptionPeriod": "P2W"
+          },
+          "localizations": [
+            {
+              "description": "Multi-target messages, image attachments and screenshot annotation.",
+              "displayName": "Nimlet Pro Monthly",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.renyicao.nimlet.pro.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Nimlet Pro Monthly",
+          "subscriptionGroupID": "21800001",
+          "type": "RecurringSubscription",
+          "winbackOffers": []
+        }
+      ]
+    }
+  ],
+  "version": {
+    "major": 3,
+    "minor": 0
+  }
+}

@@ -1,0 +1,25 @@
+name = "mice-push"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# Not a secret: the bundle id of the iOS app, which APNs calls the topic.
+[vars]
+APNS_TOPIC = "com.renyicao.mice.remote"
+
+# The three that are secret go in with `wrangler secret put`, never here:
+#   APNS_KEY      the .p8 file's contents, PEM and all
+#   APNS_KEY_ID   the 10-character key id from the portal
+#   APNS_TEAM_ID  the 10-character team id
+#   RELAY_SECRET  optional; see the note in worker.js about what it does not buy
+
+# Per-device and per-source counters at each Cloudflare location. These IDs
+# belong to this worker; do not reuse them for unrelated services.
+[[ratelimits]]
+name = "DEVICE_PUSH_LIMITER"
+namespace_id = "61413001"
+simple = { limit = 30, period = 60 }
+
+[[ratelimits]]
+name = "SOURCE_PUSH_LIMITER"
+namespace_id = "61413002"
+simple = { limit = 300, period = 60 }

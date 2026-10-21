@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Which APNs environment this build's device tokens belong to. A token
+	     minted against one is rejected by the other, so it is driven from the
+	     build configuration rather than written here: Debug builds get
+	     `development`, Release and TestFlight get `production`, and the app
+	     tells the Mac which it is so the Mac addresses the right endpoint. -->
+	<key>aps-environment</key>
+	<string>$(APS_ENVIRONMENT)</string>
+	<!-- Lets a notification through a Focus and onto a locked screen, which is
+	     the exact situation every alert this app sends exists for: an agent is
+	     blocked on a person who is deliberately not being interrupted. The code
+	     has always asked for the time-sensitive level and iOS has always
+	     quietly demoted it without this. Like the two below, it needs the
+	     matching capability on the App ID; automatic signing usually adds it. -->
+	<key>com.apple.developer.usernotifications.time-sensitive</key>
+	<true/>
+	<!-- The notification service extension is a separate process with its own
+	     bundle id, and the away key it has to open a sealed push with lives in
+	     this app's Keychain. A shared access group is the only way it can be
+	     reached from both. The app's own group is listed second so items
+	     written before this entitlement existed are still readable, and
+	     `SecretStore` moves them across the first time it finds one. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(NIMLET_BUNDLE_ID_PREFIX).shared</string>
+		<string>$(AppIdentifierPrefix)$(NIMLET_BUNDLE_ID_PREFIX).remote</string>
+	</array>
+</dict>
+</plist>

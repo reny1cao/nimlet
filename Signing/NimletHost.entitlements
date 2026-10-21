@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Deliberately empty, and kept as a file rather than omitted so that the answer
+  to "what does this keystroke-injecting app ask for?" is a thing a reviewer can
+  read rather than an absence they have to infer.
+
+  Nimlet is not sandboxed: it posts CGEvents into other applications and shells out
+  to tmux, and the sandbox forbids both. Everything else it does under the
+  hardened runtime needs no entitlement — the Accessibility grant is TCC, not an
+  entitlement, and the local-network prompt comes from the Info.plist strings.
+
+  It does NOT ask for the microphone (all audio is on the phone) and it does NOT
+  ask for com.apple.security.automation.apple-events (it sends none). Adding
+  either without code behind it would be asking a user to grant something for
+  nothing.
+-->
+<plist version="1.0">
+<dict/>
+</plist>

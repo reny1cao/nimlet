@@ -1,0 +1,18 @@
+.DS_Store
+build/
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+dist/
+
+# Built by `make tool` and by swiftc probes.
+.build/
+
+# Local Cloudflare tooling state; secrets are kept outside this repository.
+Relay/.wrangler/
+.wrangler/
+# The release website has its own Sites-managed source repository.
+/Website/
+
+# Per-developer signing overrides; see Signing/Base.xcconfig.
+Signing/Local.xcconfig

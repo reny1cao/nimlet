@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Read-only, as far as this extension is concerned: it opens a sealed
+	     push with a key the app put here and never writes one. -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)$(NIMLET_BUNDLE_ID_PREFIX).shared</string>
+	</array>
+</dict>
+</plist>

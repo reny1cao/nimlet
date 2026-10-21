@@ -1,0 +1,52 @@
+name: NimletConnectionTests
+options:
+  deploymentTarget:
+    iOS: '26.0'
+settings:
+  base:
+    SWIFT_VERSION: '5.0'
+    GENERATE_INFOPLIST_FILE: YES
+    CODE_SIGN_IDENTITY: "-"
+packages:
+  CKCP:
+    path: ../Packages/CKCP
+targets:
+  NimletConnectionTestHost:
+    type: application
+    platform: iOS
+    sources:
+      - path: NimletConnectionTests/Host.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renyicao.mice.connectiontesthost
+        CODE_SIGN_ENTITLEMENTS: NimletConnectionTests/Host.entitlements
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: CONNECTION_TEST_HOST
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: Microphone permission for the real remote-control view in connection tests.
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: Speech permission for the real remote-control view in connection tests.
+  NimletConnectionTests:
+    type: bundle.unit-test
+    platform: iOS
+    dependencies:
+      - target: NimletConnectionTestHost
+      - package: CKCP
+    sources:
+      - path: ../NimletRemote
+        excludes: [NimletRemoteApp.swift, Info.plist]
+      - path: ../NimletHost/AudioEncoder.swift
+      - path: ../Shared
+      - path: ../DirectLink
+      - path: NimletConnectionTests
+      - path: StoreKit/Nimlet.storekit
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.renyicao.mice.connectiontests
+schemes:
+  NimletConnectionTests:
+    build:
+      targets:
+        NimletConnectionTests: [test]
+    run:
+      storeKitConfiguration: StoreKit/Nimlet.storekit
+    test:
+      targets: [NimletConnectionTests]

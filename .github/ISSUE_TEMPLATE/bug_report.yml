@@ -1,0 +1,53 @@
+name: Bug report
+description: Something Nimlet did that it should not have, or did not do.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security problems do not go here. See [SECURITY.md](../blob/main/SECURITY.md).
+
+        Please check that the Mac and the phone are on matching builds first;
+        mismatches are reported in the app and fixed by updating the older side.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: iPhone build, Mac build, iOS and macOS versions.
+      placeholder: "iPhone 0.1.1 (49), Mac 0.1.1 (49), iOS 26.1, macOS 26.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: route
+    attributes:
+      label: How was the phone connected?
+      options:
+        - Same Wi-Fi
+        - VPN (Tailscale or similar)
+        - Direct (IPv6 or forwarded port)
+        - Relay
+        - Not connected / not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Which target was selected, what you did on the phone, and what actually happened on the Mac.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: |
+        Mac menu bar → Copy diagnostics, pasted here. It holds versions,
+        permissions, connection state and Nimlet's own recent log lines; no
+        text you typed or dictated and no pairing code. Read it before posting.
+      render: text

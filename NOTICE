@@ -1,0 +1,13 @@
+Nimlet
+Copyright 2026 Renyi Cao
+
+This product includes software developed by Renyi Cao and contributors,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This product includes KCP (Packages/CKCP), Copyright (c) 2017 Lin Wei,
+licensed under the MIT License. See THIRD-PARTY-NOTICES.txt for its full
+notice.
+
+"Nimlet" and the Nimlet icon are trademarks of Renyi Cao. The Apache
+License does not grant permission to use them; see the Trademarks section
+of README.md.

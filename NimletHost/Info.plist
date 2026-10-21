@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Nimlet</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Nimlet</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>MiceConnectRelay</key>
+	<string>$(MICE_CONNECT_RELAY)</string>
+	<key>MiceConnectRelayFingerprint</key>
+	<string>$(MICE_CONNECT_RELAY_FINGERPRINT)</string>
+	<key>MicePushRelaySecret</key>
+	<string>$(MICE_PUSH_RELAY_SECRET)</string>
+	<key>MicePushRelayURL</key>
+	<string>$(MICE_PUSH_RELAY_URL)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_mice._tcp</string>
+		<string>_nimlet._tcp</string>
+	</array>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Nimlet listens on your local network so your iPhone can act as a trackpad and send dictated text to this Mac.</string>
+</dict>
+</plist>

@@ -1,0 +1,20 @@
+// Who signs the apps, and the prefix of every bundle identifier.
+//
+// These are the official values. To build for your own devices, put your own
+// in Signing/Local.xcconfig (ignored by Git) and run `make project` again:
+//
+//   DEVELOPMENT_TEAM = ABCDE12345
+//   NIMLET_BUNDLE_ID_PREFIX = com.example.nimlet
+//   NIMLET_MAC_SIGN_IDENTITY = -
+//
+// Official builds must keep `com.renyicao.mice`: it is the identity of the
+// shipped apps, their keychain group and their APNs topic.
+DEVELOPMENT_TEAM = HG29U745Q5
+NIMLET_BUNDLE_ID_PREFIX = com.renyicao.mice
+
+// The Mac app and the `nimlet` tool inside it are signed with Developer ID,
+// because notarization accepts nothing else. A Mac without that certificate
+// can sign to run locally with `-`, or use `Apple Development`.
+NIMLET_MAC_SIGN_IDENTITY = Developer ID Application
+
+#include? "Local.xcconfig"
